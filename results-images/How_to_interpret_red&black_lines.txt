@@ -1,0 +1,13 @@
+# List of change in params as the legend is not saved in the figures (lower_lim='black', upper_lim='red'):
+
+
+Accretion disk params: 
+
+GAMMA: [0.4, 1, 15]
+SIGMA0: [8, 11, 20]
+M1: [3, 6, 15]
+
+Dark matter spike params: 
+
+GAMMA_S: [1/3, 2, 15]
+RHO_DM: [15, 18, 20]
