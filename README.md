@@ -20,7 +20,7 @@ This repository contains the materials for my thesis project, which focuses on s
 
 **Description:** This Jupyter Notebook focuses on defining a class to encapsulate functions necessary for analysis while conducting simulations of dephasing under different parameter sets.
 
-### Phase_extraction_Parameter-Comparison.ipynb
+### Phase_extraction_DM_vs_Acc.ipynb
 
 **Description:** This Jupyter Notebook compares the effects of parameter changes on dephasing. It generates meshgrid plots to visualize changes in dephasing frequencies when varying two parameters simultaneously. Additionally, it addresses the question of the maximum detectable frequency for each parameter realization.
 
