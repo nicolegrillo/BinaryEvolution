@@ -2,6 +2,8 @@
 
 This repository contains the materials for my thesis project, which focuses on studying the effect of environments on dephasing with respect to vacuum gravitational wave solutions.
 
+![](results-images/dephasing_effective_1e5.png)
+
 ## Files:
 
 ### Phase_extraction-MAIN.ipynb
