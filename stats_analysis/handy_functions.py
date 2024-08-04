@@ -155,6 +155,7 @@ def f_1yr(accretion):
     f_grid = np.linspace(f_isco, f_isco * 0.001, int(1e6))
     
     t_coal_f = -time_to_coal(f_grid, accretion)
+    #print(t_coal_f)
         
     interpolation = interp1d(t_coal_f, f_grid)
     

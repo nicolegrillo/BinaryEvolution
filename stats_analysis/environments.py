@@ -224,12 +224,12 @@ class myAccretionDisk:
         return self.sigma_acc(r) / (2 * h) 
     
     def gas_torque(self, r):
-        omega_2 = G * self.Binary_init.m1 / r**3
+        omega_2 = G * self.Binary_init.M_tot / r**3
         return - self.sigma_acc(r) * r**4 * omega_2 * self.Binary_init.q**2 * self.mach**2
     
     def dot_r_acc(self, r):
     
-        r_dot_acc = 2 * self.gas_torque(r) / self.Binary_init.mu * np.sqrt(r / (G * self.Binary_init.m1))
+        r_dot_acc = 2 * self.gas_torque(r) * r**(1/2) / (self.Binary_init.mu * (G * self.Binary_init.M_tot)**(1/2))
         
         #r_dot_acc = self.gas_torque(r) * r**(1/2) / (2 * G**(1/2) * self.Binary_init.m2 * self.Binary_init.M_tot**(1/2))
         
