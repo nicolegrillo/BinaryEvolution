@@ -1,13 +1,5 @@
 The following file contains info regarding the .py files present in the repository. 
 
-# environments.py: 
+# environments_handy_functions.py: 
 
-It contains the classes for each environment type, using M_tot as the total mass = m1 + m2 in the formalism. 
-
-# environments-m1.py:
-
-It contains the classes for each environment type, using an approximated M_tot = m1 in the formalism. 
-
-# handy_functions.py:
-
-It contains the functions to perform the calculations for the dephasing and the time to coalescence, as well as other stuff (like the frqeuency grid and the 1yr-to-merge related frequency). 
+It contains the classes for each environment type, using M_tot as the total mass = m1 + m2 in the formalism. It also contains the functions to perform the calculations for the dephasing and the time to coalescence, as well as other stuff (like the frqeuency grid and the 1yr-to-merge related frequency). The integrals methods are different from the ODE adopted in the "Phase_Extraction-MAIN.ipynb", otherwise the convergence of the NS takes more than a week to compile! I decided to keep a simple cumulative integral, but we can discuss on what to vary or where to run the sampling so that it does not damage my pc :).
