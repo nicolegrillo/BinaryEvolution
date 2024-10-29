@@ -16,4 +16,4 @@ This repository contains the materials for my thesis project, which focuses on s
 
 ## Usage:
 
-To use these Jupyter Notebook files, open them in a compatible environment such as Jupyter Notebook or JupyterLab and execute the cells sequentially. Ensure that the required dependencies and datasets are available in your environment. For the .py files, do the same, ensuring you have downloaded the environments_handy_functions.py library, as well as the pydd library, following the instructions available at [https://github.com/pipcole/pydd/tree/main]. 
+To use these Jupyter Notebook files, open them in a compatible environment such as Jupyter Notebook or JupyterLab and execute the cells sequentially. Ensure that the required dependencies and datasets are available in your environment. For the .py files, do the same, ensuring you have downloaded the "***environments_handy_functions***" library, as well as the "***pydd***" library, following the instructions available at [https://github.com/pipcole/pydd/tree/main]. 
