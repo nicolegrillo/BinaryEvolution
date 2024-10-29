@@ -1,25 +1,19 @@
 # BinaryEvolution
 
-This repository contains the materials for my thesis project, which focuses on studying the effect of environments on dephasing with respect to vacuum gravitational wave solutions.
+This repository contains the materials for my thesis project, which focuses on studying the effect of environments with respect to vacuum gravitational wave solutions. An example of the dephasing from the vacuum case is shown below. 
 
 ![Example](results-images/dephasing_effective_1e5.png)
-
-## Main-files:
-
-### Phase_extraction-MAIN.ipynb
-
-**Description:** This Jupyter Notebook file contains the final class I developed for generating and analyzing systems to observe dephasing. It implements numerical and analytical integrations for validation and prediction of the detectability of one environment compared to another.
-
-### Phase_extraction_Class+params.ipynb
-
-**Description:** This Jupyter Notebook focuses on defining a class to encapsulate functions necessary for analysis while conducting simulations of dephasing under different parameter sets.
 
 ## Folders:
 
 ### stats_analysis:
 
-**Description:** It contains the injected-signal tests I did on the different parameters of the binary to recover their posterior distribution, according to Bayesian statistics and Nested Sampling algorithms. The files are named based on the parameters I studied. 
+**Description:** It contains the injected-signal tests I did on the different parameters of the binary to recover their posterior distribution, according to Bayesian statistics and Nested Sampling algorithms. They are distinguished between biased signal analysis and single systems analysis, depending on the injections/analysis pairs.  
+
+### Old works:
+
+**Description:** Old notebooks used during the setting phase, along with qualitative study. 
 
 ## Usage:
 
-To utilize these Jupyter Notebook files, open them in a compatible environment such as Jupyter Notebook or JupyterLab and execute the cells sequentially. Ensure that the required dependencies and datasets are available in your environment.
+To use these Jupyter Notebook files, open them in a compatible environment such as Jupyter Notebook or JupyterLab and execute the cells sequentially. Ensure that the required dependencies and datasets are available in your environment. For the .py files, do the same, ensuring you have downloaded the "***environments_handy_functions***" library, as well as the "***pydd***" library, following the instructions available at [https://github.com/pipcole/pydd/tree/main]. 
