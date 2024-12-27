@@ -54,10 +54,7 @@ SNR_THRESH = 100.0
 TITLE = "LISA"
 
 def myget_signal_system() -> Tuple[myVacuumBinary, myCombination, Tuple[float, float]]:
-    """
-    Creates an accretion disk with SNR and duration as set above for given detector.
     
-    """
     m1 = 1e5 * MSUN # kg
     m2 = 10 * MSUN # kg
     
@@ -68,7 +65,7 @@ def myget_signal_system() -> Tuple[myVacuumBinary, myCombination, Tuple[float, f
     
     r_s = 2 * G * m1/ C**2 # Schwartzschild radius of m1
     r0 = 3 * r_s
-    Mach = 100 
+    Mach = 100
     sigma0 = 1.5e10 / Mach**2
     alpha = -1/2
     
@@ -77,7 +74,7 @@ def myget_signal_system() -> Tuple[myVacuumBinary, myCombination, Tuple[float, f
     _VB = myVacuumBinary(
     m1=m1,
     m2=m2,
-    dist=100e6 * PC, 
+    dist=100e6 * PC,
     chirp_mass=m_chirp)
     
     q = _VB.q
@@ -88,18 +85,18 @@ def myget_signal_system() -> Tuple[myVacuumBinary, myCombination, Tuple[float, f
     
     # m1, m2, dist, mach, sigma0, alpha, r0, chirp_mass, q, gammas, rho6, r6, epsv
     
-    _COMBO = myCombination(m1=m1, 
-                        m2=m2, 
-                        dist=100e6 * PC, 
-                        mach=Mach, 
-                        sigma0=sigma0, 
+    _COMBO = myCombination(m1=m1,
+                        m2=m2,
+                        dist=100e6 * PC,
+                        mach=Mach,
+                        sigma0=sigma0,
                         alpha=alpha,
                         r0=r0,
-                        q=q, 
-                        gammas=gammas, 
-                        rho6=rho6, 
-                        r6=r6, 
-                        epsv=epsv, 
+                        q=q,
+                        gammas=gammas,
+                        rho6=rho6,
+                        r6=r6,
+                        epsv=epsv,
                         chirp_mass=m_chirp)
 
     # Frequency range and grids
@@ -107,18 +104,18 @@ def myget_signal_system() -> Tuple[myVacuumBinary, myCombination, Tuple[float, f
     FS = np.linspace(max(F_RANGE_D[0], f_range_n[0]), min(F_RANGE_D[1], f_range_n[1]), 50_000)
 
     # Get dL such that SNR is as set above
-    _fn = lambda dL: mycalculate_SNR(myCombination(m1=m1, 
-                                                  m2=m2, 
-                                                  dist=dL, 
-                                                  mach=Mach, 
-                                                  sigma0=sigma0, 
+    _fn = lambda dL: mycalculate_SNR(myCombination(m1=m1,
+                                                  m2=m2,
+                                                  dist=dL,
+                                                  mach=Mach,
+                                                  sigma0=sigma0,
                                                   alpha=alpha,
                                                   r0=r0,
-                                                  q=q, 
-                                                  gammas=gammas, 
-                                                  rho6=rho6, 
-                                                  r6=r6, 
-                                                  epsv=epsv, 
+                                                  q=q,
+                                                  gammas=gammas,
+                                                  rho6=rho6,
+                                                  r6=r6,
+                                                  epsv=epsv,
                                                   chirp_mass=m_chirp), FS[::-1], S_n)
     
     res = root_scalar(lambda dL: (_fn(dL) - SNR_THRESH), bracket=(0.1e6 * PC, 100000e6 * PC))
@@ -127,33 +124,32 @@ def myget_signal_system() -> Tuple[myVacuumBinary, myCombination, Tuple[float, f
     
     # Redefine DM and VB with "new" distance
     
-    _COMBO_new = myCombination(m1=m1, 
-                        m2=m2, 
-                        dist=DL, 
-                        mach=Mach, 
+    _COMBO_new = myCombination(m1=m1,
+                        m2=m2,
+                        dist=DL,
+                        mach=Mach,
                         sigma0=sigma0,
                         alpha = alpha,
                         r0=r0,
-                        q=q, 
-                        gammas=gammas, 
-                        rho6=rho6, 
-                        r6=r6, 
-                        epsv=epsv, 
+                        q=q,
+                        gammas=gammas,
+                        rho6=rho6,
+                        r6=r6,
+                        epsv=epsv,
                         chirp_mass=m_chirp)
     
     _VB_new = myVacuumBinary(
     m1=m1,
     m2=m2,
-    dist=DL, 
+    dist=DL,
     chirp_mass=m_chirp)
 
     return _VB_new, _COMBO_new, F_RANGE_D
 
 _VB, _COMBO, F_RANGE_D = myget_signal_system()
-
-FS = np.linspace(F_RANGE_D[-1], F_RANGE_D[0], 3000)  # coarser grid
-
+FS = np.linspace(F_RANGE_D[-1], F_RANGE_D[0], 10000)
 PAD_LOW, PAD_HIGH = get_match_pads(FS[::-1])  # padding for likelihood calculation
+
 
 def get_frequency_noise(psd, fs):
     
@@ -199,10 +195,11 @@ def calculate_match_unnormd_fft(
     Sns = S_n(fs)
 
     # Use IFFT trick to maximize over t_c. Ref: Maggiore's book, eq. 7.171.
-    integrand = 4 * wf_h.conj() * wf_d / Sns * df 
+    integrand = 4 * wf_h.conj() * wf_d / Sns * df
     integrand_padded = np.concatenate((pad_low, integrand, pad_high))
     
     return np.abs(len(integrand_padded) * np.fft.ifft(integrand_padded)).max()
+
 
 def loglikelihood_fft(
     params_h, params_d, fs, pad_low, pad_high, S_n=S_n
@@ -223,42 +220,40 @@ def loglikelihood_fft(
 
 true_value = np.array([_COMBO.Binary_init.chirp_mass, _COMBO.DarkMatter_init.rho6, _COMBO.DarkMatter_init.gammas, _COMBO.Binary_init.q, _COMBO.Accretion_init.alpha, _COMBO.Accretion_init.sigma0])
 
-# set smaller prior range
-
-# set smaller prior range
+mtrue = 0
 
 def ptform(u: np.ndarray) -> np.ndarray:
     """
     Maps [0, 1] to deviations away (in log space) from true values. () brackets have flat prior choices.
     """
-    assert u.shape == (3,)
+    assert u.shape == (4,)
     
-    m_chirp = np.array([(mtrue - 10 + 2 * (10) * u[2]) - mtrue])
+    m_chirp = np.array([2 * (0.6) * (u[0]-0.5)])
     #rho6 = np.array([np.log10(true_value[1]) - 0.01 + 2 * (0.1) * u[1]])
     #gamma = np.array([2 * (0.2) * (u[2]-0.5)])
-    #q = np.array([np.log10(true_value[3]) - 0.1 + 2 * (0.06) * u[3]])
-    alpha = np.array([2 * (2) * (u[1]-0.5)])
-    sigma0 = np.array([np.log10(true_value[5]) - 2 + 2 * (4) * u[2]])
+    q = np.array([np.log10(true_value[3]) - 0.0005 + 2 * (0.0005) * u[3]])
+    alpha = np.array([2 * (1.2) * (u[1]-0.5)])
+    sigma0 = np.array([8.0 + 1.2 * u[2]])
     
-    return np.array([m_chirp, alpha, sigma0]).reshape(3,)
+    return np.array([m_chirp, alpha, sigma0, q]).reshape(4,)
 
 
-def unpack(x: np.ndarray) -> myDarkMatter:
+def unpack(x: np.ndarray) -> myAccretionDisk:
     """
     Convenience function to unpack parameters into a dark dress.
     """
     dMc = x[0]
     #drho6 = x[1]
     #dgamma = x[2]
-    #dq = x[3]
     dalpha = x[1]
     dsigma0 = x[2]
+    dq = x[3]
     
     Mc = _COMBO.Binary_init.chirp_mass + dMc * MSUN
     #rho6 = 10**(drho6)
     #gammas = _COMBO.DarkMatter_init.gammas + dgamma
-    q = _COMBO.Binary_init.q
-    alpha = _COMBO.Accretion_init.alpha + dalpha
+    q = 10**(dq)
+    alpha = dalpha + _COMBO.Accretion_init.alpha
     sigma0 = 10**(dsigma0)
     
     m_1 = get_m_1(Mc, q)
@@ -268,7 +263,7 @@ def unpack(x: np.ndarray) -> myDarkMatter:
     
     r_s = 2 * G * m_1/ C**2 # Schwartzschild radius of m1
     r0 = 3 * r_s
-    #Mach = 100
+    Mach = 100
     
     return myAccretionDisk(mach=Mach, m1=m_1, m2=m_2, r0=r0, dist=DL, sigma0=sigma0, alpha=alpha, chirp_mass=Mc)
 
@@ -279,28 +274,23 @@ def get_ll_fft(x: np.ndarray) -> np.ndarray:
     """
     ad_h = unpack(x)
     return loglikelihood_fft(ad_h, _COMBO, FS, PAD_LOW, PAD_HIGH, S_n)
-
-mtrue = 0
-#gamma_true = 0
-alpha_true = 0
-
-#logrho6_true = np.log10(_COMBO.DarkMatter_init.rho6)
-#logq_true = np.log10(_COMBO.Binary_init.q)
-logsigma0_true = np.log10(_COMBO.Accretion_init.sigma0)
+    
 
 # Initialize the nested sampler
-# Use 500 - 2000 live points. You need a lot, otherwise you may miss the high-likelihood region!
-sampler = dynesty.NestedSampler(get_ll_fft, ptform, 3, nlive=1500, bound='single')
+sampler = dynesty.NestedSampler(get_ll_fft, ptform, 4, nlive=1200, bound='single')
+
+sampler.reset()
 
 # Run the nested sampling
-sampler.run_nested(dlogz=1.0)
+sampler.run_nested(dlogz=0.1)
 
 # Extract the results
 results = sampler.results
 
 import pickle
 
-with open('sampling_results_accVScombo.pkl', 'wb') as f:
+with open('results/sampling_results_accVScomboQ5.pkl', 'wb') as f:
     pickle.dump(results, f)
 
-print("Results saved to 'sampling_results_accVScombo.pkl'")
+print("Results saved to 'sampling_results_accVScomboQ5.pkl'")
+

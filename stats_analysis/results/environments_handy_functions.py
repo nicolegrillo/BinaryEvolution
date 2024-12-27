@@ -5,13 +5,13 @@ import scipy as sp
 from typing import Callable, NamedTuple, Tuple, Type, Union
 from scipy.integrate import quad_vec, simpson
 from scipy.special import hyp2f1, betainc
-import pandas as pd
+#import pandas as pd
 #import seaborn as sns
 from tqdm import tqdm
 from matplotlib.colors import LogNorm
 from scipy.integrate import cumulative_trapezoid, cumulative_simpson
 from scipy.interpolate import CubicSpline
-from scipy.integrate import quad, solve_ivp, cumulative_trapezoid # simps
+from scipy.integrate import quad, solve_ivp, simps, cumulative_trapezoid
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize_scalar
 
@@ -286,9 +286,9 @@ class myAccretionDisk:
     
     def dot_r_acc(self, r):
     
-        r_dot_acc = 2 * self.gas_torque(r) * r**(1/2) / (self.Binary_init.mu * (G * self.Binary_init.M_tot)**(1/2))
+        #r_dot_acc = 2 * self.gas_torque(r) * r**(1/2) / (self.Binary_init.mu * (G * self.Binary_init.M_tot)**(1/2))
         
-        #r_dot_acc = self.gas_torque(r) * r**(1/2) / (2 * np.sqrt(G * self.Binary_init.M_tot) * self.Binary_init.m2)
+        r_dot_acc = self.gas_torque(r) * r**(1/2) / (2 * np.sqrt(G * self.Binary_init.M_tot) * self.Binary_init.m2)
         
         return r_dot_acc
 
@@ -444,7 +444,7 @@ class myDarkMatter:
         eta = (5 + 2 * gamma_e) / (2 * (8 - self.gammas)) * (f_eq / f_b)**((11 - 2 * self.gammas)/3)
         
         h2f1 = hyperbolic_function(y, theta)
-        #dh2f1_dy = #5 / (3*(1 + theta)) * y**(-5/(3*theta) - 1) * hyp2f1(2, 1+theta, 2+theta, -y**(-5/(3*theta))) #derivative_hyperbolic_function(h2f1, y)
+        dh2f1_dy = 5/(3*y) * (-1/(1+y**(-5/(3*theta))) + h2f1)
         
         #   Derivative terms
         dy_df = 1 / f_t
@@ -452,7 +452,9 @@ class myDarkMatter:
         #dh2f1_term = dh2f1_dy * dy_df
         
         ## Final derivative :
-        dphase_tot_df = (1 + eta * (-1 + h2f1) * y**(-Lambda)) * dphase_vacuum_df + 1/3 * eta * phase_vacuum * y**(-1-Lambda) * (3 * Lambda + (5 - 3 * Lambda) * h2f1 - 5/(1 + y**(-5/(3*theta)))) * dy_df
+        dphase_tot_df = dphase_vacuum_df - dphase_vacuum_df * eta * y**(-Lambda) + Lambda * y**(-Lambda-1) * dy_df * eta * phase_vacuum + dphase_vacuum_df * eta * y**(-Lambda) * h2f1 - Lambda * y**(-Lambda -1) * dy_df * h2f1 * eta * phase_vacuum + phase_vacuum * eta * y**(-Lambda) * dh2f1_dy * dy_df
+        
+        #(1 + eta * (-1 + h2f1) * y**(-Lambda)) * dphase_vacuum_df + 1/3 * eta * phase_vacuum * y**(-1-Lambda) * (3 * Lambda + (5 - 3 * Lambda) * h2f1 - 5/(1 + y**(-5/(3*theta)))) * dy_df
         #dphase_vacuum_df * (1 - eta * y**(-Lambda) * (1 - h2f1)) + phase_vacuum * (-eta * dy_power_term * (1 - h2f1) + eta * y**(-Lambda) * dh2f1_term)
         
         df_dr_s = self.Binary_init.df_dr(r)
@@ -478,22 +480,22 @@ class myCombination:
 
 # -------------------------- Grid functions: -------------------------------------------
     
-def find_grid(params, tobs):
+def find_grid(params, n_year):
     
     r_isco = 6 * G * params.Binary_init.m1 / c**2
     f_h = params.Binary_init.frequency(r_isco)
 
     if isinstance(params, myAccretionDisk):
         accretion = params
-        f_l = f_1yr(accretion, tobs)
+        f_l = f_1yr(accretion, n_year)
         
     if isinstance(params, myDarkMatter):
         darkmatter = params
-        f_l = f_1yr(darkmatter, tobs)
+        f_l = f_1yr(darkmatter, n_year)
         
     if isinstance(params, myCombination):
         combo = params
-        f_l = f_1yr(combo, tobs)
+        f_l = f_1yr(combo, n_year)
         
         
     return (f_l, f_h)
@@ -539,7 +541,26 @@ def ddot_phase(f, params):
 
 def h_0(f, params):
     '''Finds the strain as a function of frequency, and \ddot{\Phi}'''
-    return 1/2 * 4 * np.pi**(2/3) * G**(5/3) * params.Binary_init.chirp_mass**(5/3) * f**(2/3) / c**4 * (2 * np.pi / ddot_phase(f, params))**(1/2) #/ (vacuum.dist)
+    
+    if isinstance(params, myVacuumBinary):
+        vacuum = params
+        mass = vacuum.chirp_mass 
+    
+    else:
+        
+        if isinstance(params, myAccretionDisk):
+            accretion = params
+            mass = accretion.Binary_init.chirp_mass
+        
+        if isinstance(params, myDarkMatter):
+            darkmatter = params
+            mass = darkmatter.Binary_init.chirp_mass
+        
+        if isinstance(params, myCombination):
+            combo = params
+            mass = combo.Binary_init.chirp_mass  
+    
+    return 1/2 * 4 * np.pi**(2/3) * G**(5/3) * mass**(5/3) * f**(2/3) / c**4 * (2 * np.pi / ddot_phase(f, params))**(1/2) #/ (vacuum.dist)
     
 # -------------------------- Time to coalescence: -------------------------------------------
 
@@ -591,17 +612,17 @@ def phase_f(f_grid, params):
     phase_f = result.y[0]
     return phase_f
 
-def f_1yr(params, tobs):
+def f_1yr(params, n_year):
     '''Finds the coalescence time integrating over the frequency domain.'''
     r_isco = 6 * params.Binary_init.m1 * G / c**2
     f_isco = params.Binary_init.frequency(r_isco)
-    f_grid = np.linspace(f_isco, f_isco * 0.001, int(1e6))
+    f_grid = np.linspace(f_isco, f_isco * 0.00001, int(1e6))
 
     t_coal_f = -time_to_coal(f_grid, params)
     #print(t_coal_f)
         
     interpolation = interp1d(t_coal_f, f_grid)
-    return interpolation(tobs)
+    return interpolation(n_year)
     
 # -------------------------- Extrinsic functions: -------------------------------------------
     
@@ -621,4 +642,24 @@ def Psi(f, params, TTC, PHI_C):
 
 def amplitude(f, params):
     '''Amplitude averaged over inclination angle.'''
-    return np.sqrt(4 / 5) * h_0(f, params) / params.Binary_init.dist
+    
+    if isinstance(params, myVacuumBinary):
+        vacuum = params
+        dist = vacuum.dist
+        
+    else:
+    
+        if isinstance(params, myAccretionDisk):
+            accretion = params
+            dist = accretion.Binary_init.dist
+        
+        if isinstance(params, myDarkMatter):
+            darkmatter = params
+            dist = darkmatter.Binary_init.dist
+        
+        if isinstance(params, myCombination):
+            combo = params
+            dist = combo.Binary_init.dist    
+    
+    
+    return np.sqrt(4 / 5) * h_0(f, params) / dist
